@@ -86,22 +86,36 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
           const items: CartItem[] = await Promise.all(
             latestCart.products.map(async (cartProduct) => {
               try {
+                // Use productId from API response (fakestoreapi uses productId, not id)
+                const productId = cartProduct.productId || cartProduct.id;
+
+                // Ensure we have a valid product ID
+                if (!productId || typeof productId !== "number") {
+                  throw new Error(`Invalid product ID: ${productId}`);
+                }
+
                 // Fetch full product details from API to get complete data
-                const fullProduct = await apiService.getProductById(
-                  cartProduct.id
-                );
+                const fullProduct = await apiService.getProductById(productId);
                 return {
                   ...fullProduct,
                   quantity: cartProduct.quantity || 1,
                 };
               } catch (productError) {
                 console.error(
-                  `Error fetching product ${cartProduct.id}:`,
+                  `Error fetching product ${
+                    cartProduct.productId || cartProduct.id
+                  }:`,
                   productError
                 );
                 // Fallback to cart product data with default values
+                const productId = cartProduct.productId || cartProduct.id;
+
+                // Ensure we have a valid product ID for fallback
+                const fallbackId =
+                  typeof productId === "number" ? productId : 0;
+
                 return {
-                  id: cartProduct.id,
+                  id: fallbackId,
                   title: cartProduct.title || "Unknown Product",
                   price: cartProduct.price || 0,
                   description: cartProduct.description || "",
@@ -193,7 +207,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         // Also try to save to API using React Query mutations
         try {
           const cartProducts: CartProduct[] = newCartItems.map((item) => ({
-            id: item.id,
+            productId: item.id, // Use productId for API compatibility
             title: item.title,
             price: item.price,
             description: item.description,
@@ -264,7 +278,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       if (isAuthenticated && user && cart) {
         try {
           const cartProducts: CartProduct[] = newCartItems.map((item) => ({
-            id: item.id,
+            productId: item.id, // Use productId for API compatibility
             title: item.title,
             price: item.price,
             description: item.description,
@@ -314,7 +328,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       if (isAuthenticated && user && cart) {
         try {
           const cartProducts: CartProduct[] = newCartItems.map((item) => ({
-            id: item.id,
+            productId: item.id, // Use productId for API compatibility
             title: item.title,
             price: item.price,
             description: item.description,

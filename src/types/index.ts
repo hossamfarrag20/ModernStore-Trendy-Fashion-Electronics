@@ -69,12 +69,13 @@ export interface LoginData {
 
 // Cart types for API
 export interface CartProduct {
-  id: number;
-  title: string;
-  price: number;
-  description: string;
-  category: string;
-  image: string;
+  id?: number; // For local cart items
+  productId?: number; // For API cart items (fakestoreapi uses productId)
+  title?: string;
+  price?: number;
+  description?: string;
+  category?: string;
+  image?: string;
   quantity?: number;
 }
 
